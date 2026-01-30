@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Child_ID,Age_Months,Gender,Height_cm,Weight_kg,Region,Socio_Economic_Status,Sanitation_Access,Malnutrition_Status
 bdd640fb-0667-4ad1-9c80-317fa3b1799d,46,Male,88.1,16.0,North,High,Fair,Healthy
 23b8c1e9-3924-46de-beb1-3b9046685257,21,Male,70.0,9.0,South,High,Poor,Healthy
@@ -1999,6 +2000,8 @@ af32baf8-811d-44af-a8ca-7483dc0e3375,6,Female,49.2,5.4,South,Low,Poor,Stunted
 e6cfcbd8-79d2-4001-ad6b-8a4e18a70609,8,Male,58.8,5.0,South,Medium,Good,Wasted
 e0b4659a-09fe-4cdd-998d-65ba9d6022c5,23,Male,67.0,11.0,West,Medium,Good,Healthy
 c09c2ebe-80da-4ed7-880b-cb0ec8ab96ac,37,Male,82.9,14.3,East,Medium,Good,Healthy
+=======
+Child_ID,Age_Months,Gender,Height_cm,Weight_kg,Region,Socio_Economic_Status,Sanitation_Access,Malnutrition_Status
 bdd640fb-0667-4ad1-9c80-317fa3b1799d,46,Male,88.1,16.0,North,High,Fair,Healthy
 23b8c1e9-3924-46de-beb1-3b9046685257,21,Male,70.0,9.0,South,High,Poor,Healthy
 bd9c66b3-ad3c-4d6d-9a3d-1fa7bc8960a9,40,Male,73.0,10.7,Central,Medium,Poor,Stunted
@@ -3999,3 +4002,4 @@ af32baf8-811d-44af-a8ca-7483dc0e3375,6,Female,49.2,5.4,South,Low,Poor,Stunted
 e6cfcbd8-79d2-4001-ad6b-8a4e18a70609,8,Male,58.8,5.0,South,Medium,Good,Wasted
 e0b4659a-09fe-4cdd-998d-65ba9d6022c5,23,Male,67.0,11.0,West,Medium,Good,Healthy
 c09c2ebe-80da-4ed7-880b-cb0ec8ab96ac,37,Male,82.9,14.3,East,Medium,Good,Healthy
+>>>>>>> main
