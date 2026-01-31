@@ -1,0 +1,6 @@
+# Enforce LF for CSV files to avoid CRLF conversion warnings on Windows
+*.csv text eol=lf
+*.csv.bak text eol=lf
+
+# Treat binary model files as binary
+*.pkl binary
