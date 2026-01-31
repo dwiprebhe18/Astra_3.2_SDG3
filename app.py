@@ -140,30 +140,34 @@ if page == "📊 National Insights":
         c1, c2 = st.columns(2)
 
         with c1:
-            st.subheader("👥 Beneficiary Distribution")
-            # Interactive Pie Chart with Pull
-            pull_values = [0.0] * len(ben_df)
-            selection = st.session_state.get("pie_selection", None)
-            
-            if selection and selection.get("selection") and selection["selection"]["points"]:
-                selected_i = selection["selection"]["points"][0]["point_number"]
-                pull_values[selected_i] = 0.2
-            
-            fig_pie = px.pie(
-                ben_df,
-                values="Count",
-                names="Label",
-                hole=0.45,
-                color_discrete_sequence=px.colors.qualitative.Set2
-            )
-            fig_pie.update_traces(
-                textinfo="percent+label",
-                pull=pull_values
-            )
-            fig_pie.update_layout(
-                clickmode='event+select'
-            )
-            st.plotly_chart(fig_pie, on_select="rerun", key="pie_selection", width='stretch')
+            try:
+                st.subheader("👥 Beneficiary Distribution")
+                # Interactive Pie Chart with Pull
+                pull_values = [0.0] * len(ben_df)
+                selection = st.session_state.get("pie_selection", None)
+                
+                if selection and selection.get("selection") and selection["selection"]["points"]:
+                    selected_i = selection["selection"]["points"][0]["point_number"]
+                    pull_values[selected_i] = 0.2
+                
+                fig_pie = px.pie(
+                    ben_df,
+                    values="Count",
+                    names="Label",
+                    hole=0.45,
+                    color_discrete_sequence=px.colors.qualitative.Set2
+                )
+                fig_pie.update_traces(
+                    textinfo="percent+label",
+                    pull=pull_values
+                )
+                fig_pie.update_layout(
+                    clickmode='event+select'
+                )
+                st.plotly_chart(fig_pie, on_select="rerun", key="pie_selection", width='stretch')
+            except Exception as e:
+                st.error(f"Chart error: {str(e)}")
+                st.dataframe(ben_df)
 
         with c2:
             st.subheader("🏗️ Infrastructure Coverage")
@@ -210,23 +214,27 @@ elif page == "🧒 Community RAG Status":
         c3.metric("🟠 Amber", (df_syn["RAG_Status"] == "Amber").sum())
         c4.metric("🟢 Green", (df_syn["RAG_Status"] == "Green").sum())
 
-        rag_df = df_syn["RAG_Status"].value_counts().reset_index()
-        rag_df.columns = ['Status', 'Count']
-        
-        fig = px.pie(
-            rag_df,
-            values="Count",
-            names="Status",
-            hole=0.4,
-            color="Status",
-            color_discrete_map={
-                "Red": "#ff4b4b",
-                "Amber": "#ffa500",
-                "Green": "#2ecc71"
-            }
-        )
-        fig.update_traces(textinfo="label+percent")
-        st.plotly_chart(fig, width='stretch')
+        try:
+            rag_df = df_syn["RAG_Status"].value_counts().reset_index()
+            rag_df.columns = ['Status', 'Count']
+            
+            fig = px.pie(
+                rag_df,
+                values="Count",
+                names="Status",
+                hole=0.4,
+                color="Status",
+                color_discrete_map={
+                    "Red": "#ff4b4b",
+                    "Amber": "#ffa500",
+                    "Green": "#2ecc71"
+                }
+            )
+            fig.update_traces(textinfo="label+percent")
+            st.plotly_chart(fig, width='stretch')
+        except Exception as e:
+            st.error(f"RAG chart error: {str(e)}")
+            st.dataframe(df_syn["RAG_Status"].value_counts())
 
 # --------------------------------------------------
 # PAGE 3: AI PREDICTION
@@ -251,57 +259,62 @@ else:
             submit = st.form_submit_button("Predict Risk Status")
 
             if submit:
-                with st.spinner("Analyzing child health data..."):
-                    X = pd.DataFrame([{
-                        "Age_Months": age,
-                        "Gender": encoders['gender'].transform([gender])[0],
-                        "Height_cm": height,
-                        "Weight_kg": weight,
-                        "Region": encoders['region'].transform([region])[0],
-                        "Socio_Economic_Status": encoders['socio'].transform([socio])[0],
-                        "Sanitation_Access": encoders['sanitation'].transform([sanitation])[0]
-                    }])
+                try:
+                    with st.spinner("Analyzing child health data..."):
+                        X = pd.DataFrame([{
+                            "Age_Months": age,
+                            "Gender": encoders['gender'].transform([gender])[0],
+                            "Height_cm": height,
+                            "Weight_kg": weight,
+                            "Region": encoders['region'].transform([region])[0],
+                            "Socio_Economic_Status": encoders['socio'].transform([socio])[0],
+                            "Sanitation_Access": encoders['sanitation'].transform([sanitation])[0]
+                        }])
 
-                    pred_encoded = model.predict(X)[0]
-                    pred_mal = pred_encoded  # model.predict returns the class label directly
+                        pred_encoded = model.predict(X)[0]
+                        pred_mal = pred_encoded  # model.predict returns the class label directly
+                        
+                        rag_map = {
+                            'Healthy': 'Green',
+                            'Underweight': 'Amber',
+                            'Wasted': 'Amber',
+                            'Severely Wasted': 'Red',
+                            'Stunted': 'Red'
+                        }
+                        pred_label = rag_map.get(pred_mal, 'Green')
+                        prob = model.predict_proba(X).max()
+
+                    # Display results with animations
+                    st.markdown("---")
+                    st.subheader("📊 Prediction Results")
                     
-                    rag_map = {
-                        'Healthy': 'Green',
-                        'Underweight': 'Amber',
-                        'Wasted': 'Amber',
-                        'Severely Wasted': 'Red',
-                        'Stunted': 'Red'
-                    }
-                    pred_label = rag_map.get(pred_mal, 'Green')
-                    prob = model.predict_proba(X).max()
+                    if pred_label == 'Red':
+                        st.error(f"🔴 **High Risk: {pred_mal}** (Confidence: {prob:.2f})")
+                        st.warning("⚠️ **Immediate Action Required:** Contact local health worker for nutritional assessment.")
+                        st.markdown("**Recommendations:**")
+                        st.markdown("- Schedule immediate medical checkup")
+                        st.markdown("- Provide nutritional supplements")
+                        st.markdown("- Monitor weight and height weekly")
+                    elif pred_label == 'Amber':
+                        st.warning(f"🟠 **Moderate Risk: {pred_mal}** (Confidence: {prob:.2f})")
+                        st.info("📋 **Monitoring Required:** Regular health checkups recommended.")
+                        st.markdown("**Recommendations:**")
+                        st.markdown("- Bi-weekly health monitoring")
+                        st.markdown("- Nutritional counseling")
+                        st.markdown("- Improved sanitation if applicable")
+                    else:
+                        st.success(f"🟢 **Normal: {pred_mal}** (Confidence: {prob:.2f})")
+                        st.info("✅ **Good Health Status:** Continue regular monitoring.")
+                        st.markdown("**Recommendations:**")
+                        st.markdown("- Maintain balanced nutrition")
+                        st.markdown("- Regular growth monitoring")
+                        st.markdown("- Age-appropriate vaccinations")
 
-                # Display results with animations
-                st.markdown("---")
-                st.subheader("📊 Prediction Results")
-                
-                if pred_label == 'Red':
-                    st.error(f"🔴 **High Risk: {pred_mal}** (Confidence: {prob:.2f})")
-                    st.warning("⚠️ **Immediate Action Required:** Contact local health worker for nutritional assessment.")
-                    st.markdown("**Recommendations:**")
-                    st.markdown("- Schedule immediate medical checkup")
-                    st.markdown("- Provide nutritional supplements")
-                    st.markdown("- Monitor weight and height weekly")
-                elif pred_label == 'Amber':
-                    st.warning(f"🟠 **Moderate Risk: {pred_mal}** (Confidence: {prob:.2f})")
-                    st.info("📋 **Monitoring Required:** Regular health checkups recommended.")
-                    st.markdown("**Recommendations:**")
-                    st.markdown("- Bi-weekly health monitoring")
-                    st.markdown("- Nutritional counseling")
-                    st.markdown("- Improved sanitation if applicable")
-                else:
-                    st.success(f"🟢 **Normal: {pred_mal}** (Confidence: {prob:.2f})")
-                    st.info("✅ **Good Health Status:** Continue regular monitoring.")
-                    st.markdown("**Recommendations:**")
-                    st.markdown("- Maintain balanced nutrition")
-                    st.markdown("- Regular growth monitoring")
-                    st.markdown("- Age-appropriate vaccinations")
-
-                # Visual confidence meter
-                st.markdown("**AI Confidence Level:**")
-                st.progress(prob)
-                st.caption(f"{prob:.1%} confidence in this assessment")
+                    # Visual confidence meter
+                    st.markdown("**AI Confidence Level:**")
+                    st.progress(prob)
+                    st.caption(f"{prob:.1%} confidence in this assessment")
+                    
+                except Exception as e:
+                    st.error(f"❌ Prediction failed: {str(e)}")
+                    st.info("Please check your input values and try again.")
