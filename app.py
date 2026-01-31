@@ -30,16 +30,7 @@ st.markdown("""
 @st.cache_data
 def load_synthetic_data():
     try:
-        df = pd.read_csv('child_health_data.csv')
-        # Map Malnutrition_Status to RAG_Status
-        rag_map = {
-            'Healthy': 'Green',
-            'Underweight': 'Amber',
-            'Wasted': 'Amber',
-            'Severely Wasted': 'Red',
-            'Stunted': 'Red'
-        }
-        df['RAG_Status'] = df['Malnutrition_Status'].map(rag_map).fillna('Green')
+        df = pd.read_csv('processed_health_data.csv')
         return df
     except FileNotFoundError:
         return pd.DataFrame()
